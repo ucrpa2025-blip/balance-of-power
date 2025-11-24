@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Balance of Power - Mixed Constitution Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .btn-active { background: #2563eb; color: white; }
+        .btn-inactive { background: #334155; color: #94a3b8; }
+        .btn-inactive:hover { background: #475569; }
+        .btn-category {
+            background: #1e293b;
+            color: #64748b;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        .triangle-container { position: relative; }
+        
+        /* Compact mode styles */
+        .compact-mode .full-header { display: none; }
+        .compact-mode .full-buttons { display: none; }
+        .compact-mode .full-legend { display: none; }
+        .compact-mode .full-reference { display: none; }
+        .compact-mode #snapshot-description { font-size: 12px; max-width: 320px; margin: 0 auto; }
+        .compact-mode #triangles-wrapper { gap: 1rem; }
+        
+        /* Thumbnail mode */
+        .thumbnail-mode { max-width: 200px; cursor: pointer; }
+        .thumbnail-mode .full-header, .thumbnail-mode .full-buttons, 
+        .thumbnail-mode .full-legend, .thumbnail-mode .full-reference { display: none; }
+        .thumbnail-mode #snapshot-description { display: none; }
+        .thumbnail-mode .triangle-container svg { width: 160px; height: 170px; }
+        .thumbnail-mode h2 { font-size: 12px; }
+        .thumbnail-mode h3 { font-size: 10px; }
+        .thumbnail-mode #snapshot-subtitle { display: none; }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-7xl mx-auto" id="main-container">
+        <div class="full-header">
+            <h1 class="text-2xl font-bold text-center mb-1">The Balance of Power</h1>
+            <p class="text-slate-400 text-center mb-4 text-sm max-w-3xl mx-auto">
+                The Founders understood government through "mixed constitution" theory: 
+                balancing Executive (One), Aristocracy (Few), and Democracy (Many). Each can degenerate into a corrupt form.
+            </p>
+        </div>
+        
+        <div class="mb-6 full-buttons">
+            <div class="flex flex-wrap justify-center gap-1 mb-2">
+                <span class="btn-category">COLONIAL / FOUNDING</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-1 mb-3" id="button-container-colonial"></div>
+            
+            <div class="flex flex-wrap justify-center gap-1 mb-2">
+                <span class="btn-category">OTHER REPUBLICS</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-1 mb-3" id="button-container-other"></div>
+            
+            <div class="flex flex-wrap justify-center gap-1 mb-2">
+                <span class="btn-category">MODERN US / UTAH</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-1 mb-3" id="button-container-modern"></div>
+        </div>
+        
+        <div class="text-center mb-4">
+            <h2 class="text-xl font-semibold" id="snapshot-title"></h2>
+            <p class="text-slate-400 text-sm" id="snapshot-subtitle"></p>
+        </div>
+        
+        <div class="flex flex-wrap justify-center gap-12 mb-4" id="triangles-wrapper">
+            <!-- Left Triangle -->
+            <div class="triangle-container" id="left-container" style="display: none;">
+                <h3 class="text-center text-lg font-semibold mb-2" id="left-title"></h3>
+                <div class="relative">
+                    <svg width="340" height="380" id="left-svg" class="overflow-visible">
+                        <defs>
+                            <filter id="glow-l" x="-100%" y="-100%" width="300%" height="300%">
+                                <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <filter id="power-glow-l" x="-100%" y="-100%" width="300%" height="300%">
+                                <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <marker id="arrow-green-l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/>
+                            </marker>
+                            <marker id="arrow-red-l" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Right Triangle -->
+            <div class="triangle-container" id="right-container" style="display: none;">
+                <h3 class="text-center text-lg font-semibold mb-2" id="right-title"></h3>
+                <div class="relative">
+                    <svg width="340" height="380" id="right-svg" class="overflow-visible">
+                        <defs>
+                            <filter id="glow-r" x="-100%" y="-100%" width="300%" height="300%">
+                                <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <filter id="power-glow-r" x="-100%" y="-100%" width="300%" height="300%">
+                                <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <marker id="arrow-green-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/>
+                            </marker>
+                            <marker id="arrow-red-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-4 max-w-3xl mx-auto">
+            <p class="text-slate-300 text-sm leading-relaxed" id="snapshot-description"></p>
+        </div>
+        
+        <div class="flex flex-wrap justify-center gap-4 mb-6 text-xs full-legend">
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-green-600"></div>
+                <span class="text-slate-400">Healthy</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-amber-900"></div>
+                <span class="text-slate-400">Weak/Absent</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-red-800 border border-red-600"></div>
+                <span class="text-slate-400">Corrupt</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                <span class="text-slate-400">Power center</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="text-green-500">→</span>
+                <span class="text-slate-400">Check working</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="text-red-500">⇢</span>
+                <span class="text-slate-400">Check broken</span>
+            </div>
+        </div>
+        
+        <div class="bg-slate-800 rounded-lg p-4 max-w-3xl mx-auto text-xs full-reference">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-green-400 font-semibold">Executive (One)</div>
+                    <div class="text-slate-500">Monarch / President / Governor</div>
+                    <div class="text-red-400 mt-1">Degenerates to: Tyranny</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-green-400 font-semibold">Aristocracy (Few)</div>
+                    <div class="text-slate-500">Lords / Senate / Magistrates</div>
+                    <div class="text-red-400 mt-1">Degenerates to: Oligarchy</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-green-400 font-semibold">Democracy (Many)</div>
+                    <div class="text-slate-500">Commons / House / Deputies</div>
+                    <div class="text-red-400 mt-1">Degenerates to: Mob Rule</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL PARAMS
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const hash = window.location.hash.slice(1);
+            return {
+                snapshot: hash || params.get('snapshot') || params.get('s'),
+                mode: params.get('mode') || params.get('m'),
+            };
+        }
+        
+        function applyMode(mode) {
+            const container = document.getElementById('main-container');
+            container.classList.remove('compact-mode', 'thumbnail-mode');
+            if (mode === 'compact') container.classList.add('compact-mode');
+            else if (mode === 'thumbnail') container.classList.add('thumbnail-mode');
+        }
+        
+        function updateUrlHash(snapshotKey) {
+            if (history.replaceState) {
+                history.replaceState(null, '', window.location.pathname + window.location.search + '#' + snapshotKey);
+            }
+        }
+        
+        // TRIANGLE CONFIG
+        const centerX = 170;
+        const centerY = 190;
+        const radius = 120;
+        
+        const vertices = {
+            executive: { x: centerX, y: centerY - radius },
+            aristocracy: { x: centerX - radius * 0.866, y: centerY + radius * 0.5 },
+            democracy: { x: centerX + radius * 0.866, y: centerY + radius * 0.5 }
+        };
+        
+        // Check edge midpoints (offset for labels)
+        const checkMidpoints = {
+            execToArist: { 
+                x: (vertices.executive.x + vertices.aristocracy.x) / 2,
+                y: (vertices.executive.y + vertices.aristocracy.y) / 2
+            },
+            aristToDem: {
+                x: (vertices.aristocracy.x + vertices.democracy.x) / 2,
+                y: (vertices.aristocracy.y + vertices.democracy.y) / 2
+            },
+            demToExec: {
+                x: (vertices.democracy.x + vertices.executive.x) / 2,
+                y: (vertices.democracy.y + vertices.executive.y) / 2
+            }
+        };
+
+        // SNAPSHOT DATA
+        const snapshots = {
+            '1630': {
+                layout: 'britain-america',
+                title: 'Massachusetts Bay Colony (1630-1634)',
+                subtitle: 'Two-Element Government: No Democratic Branch',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.6, power: 0.5, 
+                        institutionName: 'CROWN',
+                        label: 'Charles I',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.6, power: 0.4, 
+                        institutionName: 'HOUSE OF LORDS',
+                        label: 'Hereditary Peers',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.5, power: 0.35, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Elected Members',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 160, y: 150 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Summons Parliament' },
+                        aristToDem: { status: 'active', label: 'Bicameral Review' },
+                        demToExec: { status: 'weak', label: 'Taxation Power' }
+                    },
+                    external: {}
+                },
+                right: {
+                    name: 'MASS. BAY',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.7, power: 0.5, 
+                        institutionName: 'GOVERNOR',
+                        label: 'John Winthrop',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.7, power: 0.6, 
+                        institutionName: 'COURT OF ASSISTANTS',
+                        label: '18 Magistrates',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0, power: 0, 
+                        institutionName: 'FREEMEN',
+                        label: 'No representation',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    powerCenter: { x: 140, y: 140 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Presides over Court' },
+                        aristToDem: { status: 'broken', label: 'No democratic body' },
+                        demToExec: { status: 'broken', label: 'Annual vote only' }
+                    },
+                    external: {},
+                    judicial: { health: 0.6, captured: 'aristocracy' }
+                },
+                description: 'The original Massachusetts Bay charter vested all power in the Governor and 18 Assistants (magistrates). Ordinary freemen had no direct voice—they could only vote for Assistants annually. A two-element system lacking the popular check.'
+            },
+            '1634': {
+                layout: 'britain-america',
+                title: 'Massachusetts Bay Reform (1634+)',
+                subtitle: 'Deputies Added: Full Mixed Constitution',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.5, power: 0.6, 
+                        institutionName: 'CROWN',
+                        label: 'Charles I (Personal Rule)',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.5, power: 0.3, 
+                        institutionName: 'HOUSE OF LORDS',
+                        label: 'Parliament dissolved',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.2, power: 0.15, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Parliament dissolved',
+                        corrupt: false,
+                        inactive: false 
+                    },
+                    powerCenter: { x: 165, y: 120 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Rules without Parliament' },
+                        aristToDem: { status: 'broken', label: 'Both dissolved' },
+                        demToExec: { status: 'broken', label: 'No taxation consent' }
+                    },
+                    external: {}
+                },
+                right: {
+                    name: 'MASS. BAY',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.7, power: 0.33, 
+                        institutionName: 'GOVERNOR',
+                        label: 'Elected by General Court',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.75, power: 0.33, 
+                        institutionName: 'MAGISTRATES',
+                        label: 'Court of Assistants',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.8, power: 0.4, 
+                        institutionName: 'DEPUTIES',
+                        label: '2-3 per town',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 170, y: 190 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Presides, no vote' },
+                        aristToDem: { status: 'active', label: 'Bicameral veto' },
+                        demToExec: { status: 'active', label: 'Elects Governor' }
+                    },
+                    external: {},
+                    judicial: { health: 0.65, captured: null },
+                    filter: { show: true, label: 'Town Meeting selects Deputies', weak: false }
+                },
+                description: 'In 1634, freemen demanded representation. Each town sent 2-3 deputies to the General Court, creating a bicameral legislature. While Charles I dissolved Parliament in England, Massachusetts built a more complete mixed constitution than the mother country.'
+            },
+            '1685': {
+                layout: 'britain-america',
+                title: 'James II & The Dominion (1685-1688)',
+                subtitle: 'Attempt at Absolute Monarchy',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.2, power: 0.85, 
+                        institutionName: 'CROWN',
+                        label: 'James II',
+                        corrupt: true, 
+                        corruptLabel: 'Tyranny' 
+                    },
+                    aristocracy: { 
+                        health: 0.4, power: 0.25, 
+                        institutionName: 'HOUSE OF LORDS',
+                        label: 'Intimidated',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.3, power: 0.15, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Packed with loyalists',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 170, y: 100 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Crown dominates' },
+                        aristToDem: { status: 'weak', label: 'Both weakened' },
+                        demToExec: { status: 'broken', label: 'Elections rigged' }
+                    },
+                    external: { top: 'Catholic France alliance' }
+                },
+                right: {
+                    name: 'NEW ENGLAND',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.15, power: 0.9, 
+                        institutionName: 'GOVERNOR-GENERAL',
+                        label: 'Edmund Andros',
+                        corrupt: true, 
+                        corruptLabel: 'Tyranny' 
+                    },
+                    aristocracy: { 
+                        health: 0.25, power: 0.45, 
+                        institutionName: 'APPOINTED COUNCIL',
+                        label: 'Crown loyalists',
+                        corrupt: true, 
+                        corruptLabel: 'Oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.05, power: 0.05, 
+                        institutionName: 'ASSEMBLIES',
+                        label: 'ABOLISHED',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    powerCenter: { x: 155, y: 105 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Governor appoints all' },
+                        aristToDem: { status: 'broken', label: 'No assembly exists' },
+                        demToExec: { status: 'broken', label: 'Town meetings banned' }
+                    },
+                    external: { top: 'Imperial consolidation' },
+                    judicial: { health: 0.2, captured: 'executive' }
+                },
+                description: 'James II consolidated New England into the Dominion, abolished colonial assemblies, and restricted town meetings to once per year. The democratic element was nearly extinguished—the first attempt to crush colonial self-governance.'
+            },
+            '1689': {
+                layout: 'britain-america',
+                title: 'Glorious Revolution & Boston Revolt (1689)',
+                subtitle: 'Balance Restored Through Resistance',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.7, power: 0.3, 
+                        institutionName: 'CROWN',
+                        label: 'William & Mary',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.75, power: 0.4, 
+                        institutionName: 'HOUSE OF LORDS',
+                        label: 'Restored authority',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.7, power: 0.45, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Bill of Rights 1689',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 175, y: 200 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Must summon Parliament' },
+                        aristToDem: { status: 'active', label: 'Bicameral legislation' },
+                        demToExec: { status: 'active', label: 'Controls taxation' }
+                    },
+                    external: {}
+                },
+                right: {
+                    name: 'MASS. BAY',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.6, power: 0.25, 
+                        institutionName: 'ROYAL GOVERNOR',
+                        label: 'Crown-appointed but checked',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.6, power: 0.3, 
+                        institutionName: 'COUNCIL',
+                        label: 'Elected by Assembly',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.8, power: 0.55, 
+                        institutionName: 'GENERAL COURT',
+                        label: 'Assemblies RESTORED',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 195, y: 220 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Governor needs Council' },
+                        aristToDem: { status: 'active', label: 'Bicameral review' },
+                        demToExec: { status: 'active', label: 'Controls salary' }
+                    },
+                    external: {},
+                    judicial: { health: 0.6, captured: null }
+                },
+                description: 'When news of the Glorious Revolution reached Boston, colonists overthrew Andros and restored their assemblies. The 1691 Charter formally restored self-governance. Suppressing democratic institutions does not eliminate them—they reassert themselves.'
+            },
+            '1760': {
+                layout: 'britain-america',
+                title: 'Salutary Neglect (1720-1760)',
+                subtitle: 'Colonial Self-Governance at its Peak',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.5, power: 0.2, 
+                        institutionName: 'CROWN',
+                        label: 'George II / George III',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.55, power: 0.55, 
+                        institutionName: 'PARLIAMENT',
+                        label: 'Lords & Commons together',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.45, power: 0.45, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Landed gentry dominate',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 150, y: 210 },
+                    checks: { 
+                        execToArist: { status: 'weak', label: 'King largely ceremonial' },
+                        aristToDem: { status: 'active', label: 'Bicameral balance' },
+                        demToExec: { status: 'weak', label: 'Ministers manage Crown' }
+                    },
+                    external: { left: 'Commercial interests growing' }
+                },
+                right: {
+                    name: 'COLONIES',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.55, power: 0.15, 
+                        institutionName: 'ROYAL GOVERNORS',
+                        label: 'Weak - need Assembly money',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.6, power: 0.2, 
+                        institutionName: 'COUNCILS',
+                        label: 'Advisory role',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.95, power: 0.8, 
+                        institutionName: 'COLONIAL ASSEMBLIES',
+                        label: 'Control the purse',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 220, y: 250 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Governor consults Council' },
+                        aristToDem: { status: 'active', label: 'Review legislation' },
+                        demToExec: { status: 'active', label: 'Pay governors salary' }
+                    },
+                    external: {},
+                    judicial: { health: 0.7, captured: null },
+                    filter: { show: true, label: 'Town Meetings feed Assemblies', weak: false }
+                },
+                description: 'For 80 years, Britain largely ignored the colonies. Colonial assemblies controlled governors\' salaries, giving them real leverage. This was not chaos—it was structured, deliberative democracy refined over generations.'
+            },
+            '1774': {
+                layout: 'britain-america',
+                title: 'Coercive Acts (1774)',
+                subtitle: 'Oligarchy Attacks Colonial Democracy',
+                left: {
+                    name: 'BRITAIN',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.4, power: 0.25, 
+                        institutionName: 'CROWN',
+                        label: 'George III',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.25, power: 0.7, 
+                        institutionName: 'PARLIAMENT',
+                        label: 'Captured by merchants',
+                        corrupt: true, 
+                        corruptLabel: 'Oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.2, power: 0.2, 
+                        institutionName: 'HOUSE OF COMMONS',
+                        label: 'Rotten boroughs',
+                        corrupt: true, 
+                        corruptLabel: 'Plutocracy' 
+                    },
+                    powerCenter: { x: 120, y: 215 },
+                    checks: { 
+                        execToArist: { status: 'weak', label: 'King follows ministers' },
+                        aristToDem: { status: 'broken', label: 'Both captured by money' },
+                        demToExec: { status: 'broken', label: 'No real representation' }
+                    },
+                    external: { left: 'East India Co.\nMerchant lobbies\nSugar planters' }
+                },
+                right: {
+                    name: 'MASSACHUSETTS',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.2, power: 0.6, 
+                        institutionName: 'MILITARY GOVERNOR',
+                        label: 'General Gage',
+                        corrupt: true, 
+                        corruptLabel: 'Military rule' 
+                    },
+                    aristocracy: { 
+                        health: 0.2, power: 0.5, 
+                        institutionName: 'MANDAMUS COUNCIL',
+                        label: 'Crown-appointed',
+                        corrupt: true, 
+                        corruptLabel: 'Imposed' 
+                    },
+                    democracy: { 
+                        health: 0.5, power: 0.35, 
+                        institutionName: 'TOWN MEETINGS',
+                        label: 'RESTRICTED by law',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 140, y: 155 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Governor appoints Council' },
+                        aristToDem: { status: 'broken', label: 'Council imposed' },
+                        demToExec: { status: 'broken', label: 'Meetings restricted' }
+                    },
+                    external: { top: 'Parliament (captured by oligarchy)' },
+                    judicial: { health: 0.2, captured: 'executive' }
+                },
+                description: 'The Massachusetts Government Act repeated 1686: military governor, appointed council, restricted town meetings. But now Parliament—not the King—was the oppressor. Colonists rebelled against oligarchy disguised as representative government.'
+            },
+            '1776-PA': {
+                layout: 'single',
+                title: 'Pennsylvania Constitution (1776)',
+                subtitle: 'Experiment in Pure Democracy',
+                right: {
+                    name: 'PENNSYLVANIA',
+                    nameColor: 'text-amber-300',
+                    executive: { 
+                        health: 0.3, power: 0.1, 
+                        institutionName: 'EXECUTIVE COUNCIL',
+                        label: '12-member committee',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0, power: 0, 
+                        institutionName: 'UPPER HOUSE',
+                        label: 'NONE - Unicameral',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    democracy: { 
+                        health: 0.55, power: 0.9, 
+                        institutionName: 'GENERAL ASSEMBLY',
+                        label: 'Single chamber, annual elections',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 215, y: 250 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'No upper house exists' },
+                        aristToDem: { status: 'broken', label: 'No bicameral check' },
+                        demToExec: { status: 'weak', label: 'Assembly dominates' }
+                    },
+                    external: { right: 'Faction and instability' },
+                    judicial: { health: 0.4, captured: 'democracy' }
+                },
+                description: 'Pennsylvania eliminated the aristocratic element entirely: unicameral legislature, weak plural executive, judges elected for short terms. Without structural checks, factions dominated and policy swung wildly. Replaced in 1790 with bicameral system.'
+            },
+            '1786': {
+                layout: 'single',
+                title: 'Shays\' Rebellion (1786-87)',
+                subtitle: 'The Polybian Cycle in Action',
+                right: {
+                    name: 'MASSACHUSETTS',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.4, power: 0.15, 
+                        institutionName: 'GOVERNOR',
+                        label: 'James Bowdoin (weak)',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.25, power: 0.45, 
+                        institutionName: 'STATE SENATE',
+                        label: 'Captured by creditors',
+                        corrupt: true, 
+                        corruptLabel: 'Oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.35, power: 0.55, 
+                        institutionName: 'FARMERS',
+                        label: 'Armed, closing courts',
+                        corrupt: true, 
+                        corruptLabel: 'Trending mob' 
+                    },
+                    powerCenter: { x: 180, y: 235 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Cannot enforce order' },
+                        aristToDem: { status: 'broken', label: 'Creditors vs debtors' },
+                        demToExec: { status: 'broken', label: 'Extra-legal action' }
+                    },
+                    external: { left: 'Boston creditors', right: 'Debtor farmers (armed)' },
+                    judicial: { health: 0.3, captured: 'aristocracy' }
+                },
+                description: 'Under the Articles of Confederation, the Massachusetts legislature was captured by Boston creditors (oligarchy). Farmers responded by shutting down courts (trending mob rule). This is Polybius\'s cycle: oligarchy provokes uprising.'
+            },
+            '1789': {
+                layout: 'single',
+                title: 'The U.S. Constitution (1789)',
+                subtitle: 'Mixed Constitution by Design',
+                right: {
+                    name: 'UNITED STATES',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.85, power: 0.33, 
+                        institutionName: 'PRESIDENT',
+                        label: 'Electoral College selection',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.85, power: 0.33, 
+                        institutionName: 'SENATE',
+                        label: 'Chosen by state legislatures',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.85, power: 0.34, 
+                        institutionName: 'HOUSE OF REPRESENTATIVES',
+                        label: 'Directly elected',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 170, y: 190 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Appointments, Veto' },
+                        aristToDem: { status: 'active', label: 'Ratification, Treaties' },
+                        demToExec: { status: 'active', label: 'Impeachment, Appropriations' }
+                    },
+                    external: {},
+                    judicial: { health: 0.8, captured: null }
+                },
+                description: 'The Founders created interlocking checks: President via Electoral College, Senate via state legislatures, House directly elected. Each element checks the others\' corruption. This is not balance as a static point—it resists drift.'
+            },
+            '1793-France': {
+                layout: 'single',
+                title: 'French Republic - The Terror (1793-94)',
+                subtitle: 'Democracy to Mob Rule to Tyranny',
+                right: {
+                    name: 'FRANCE',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.15, power: 0.8, 
+                        institutionName: 'COMMITTEE OF PUBLIC SAFETY',
+                        label: 'Robespierre',
+                        corrupt: true, 
+                        corruptLabel: 'Tyranny' 
+                    },
+                    aristocracy: { 
+                        health: 0, power: 0, 
+                        institutionName: 'ARISTOCRACY',
+                        label: 'ABOLISHED (executed)',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    democracy: { 
+                        health: 0.2, power: 0.55, 
+                        institutionName: 'PARIS SECTIONS',
+                        label: 'Sans-culottes mobs',
+                        corrupt: true, 
+                        corruptLabel: 'Ochlocracy' 
+                    },
+                    powerCenter: { x: 150, y: 125 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Aristocracy eliminated' },
+                        aristToDem: { status: 'broken', label: 'No deliberative body' },
+                        demToExec: { status: 'broken', label: 'Mob enables tyranny' }
+                    },
+                    external: { left: 'War panic\nFood crisis', right: 'Paris mob\nSans-culottes' }
+                },
+                description: 'France abolished its aristocratic element entirely (executing nobles). Without structural checks, the Convention was dominated by Paris mobs, enabling the Committee\'s tyranny. The Polybian cycle completed in months.'
+            },
+            '1795-Dutch': {
+                layout: 'custom',
+                title: 'Batavian Republic (1795-1806)',
+                subtitle: 'Revolution Under Foreign Control',
+                left: {
+                    name: 'NETHERLANDS',
+                    nameColor: 'text-orange-300',
+                    executive: { 
+                        health: 0.3, power: 0.5, 
+                        institutionName: 'DIRECTORY',
+                        label: 'French-controlled agents',
+                        corrupt: true, 
+                        corruptLabel: 'Puppet' 
+                    },
+                    aristocracy: { 
+                        health: 0.15, power: 0.15, 
+                        institutionName: 'REGENTS',
+                        label: 'Old oligarchy purged',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    democracy: { 
+                        health: 0.45, power: 0.5, 
+                        institutionName: 'PATRIOTS',
+                        label: 'Unitarist reformers',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 160, y: 150 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Old system destroyed' },
+                        aristToDem: { status: 'weak', label: 'No stable structure' },
+                        demToExec: { status: 'broken', label: 'France controls executive' }
+                    },
+                    external: { top: 'French military control' }
+                },
+                right: {
+                    name: 'FRANCE',
+                    nameColor: 'text-blue-300',
+                    executive: { 
+                        health: 0.3, power: 0.9, 
+                        institutionName: 'FIRST CONSUL',
+                        label: 'Napoleon Bonaparte',
+                        corrupt: true, 
+                        corruptLabel: 'Tyranny' 
+                    },
+                    aristocracy: { 
+                        health: 0.3, power: 0.2, 
+                        institutionName: 'SENATE',
+                        label: 'Rubber stamp',
+                        corrupt: true, 
+                        corruptLabel: 'Facade' 
+                    },
+                    democracy: { 
+                        health: 0.2, power: 0.1, 
+                        institutionName: 'TRIBUNATE',
+                        label: 'Silenced',
+                        corrupt: false, 
+                        inactive: true 
+                    },
+                    powerCenter: { x: 170, y: 95 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Napoleon dominates' },
+                        aristToDem: { status: 'broken', label: 'Both subordinate' },
+                        demToExec: { status: 'broken', label: 'No real voice' }
+                    },
+                    external: {}
+                },
+                description: 'Dutch Patriots overthrew traditional federalism with French help. But Napoleon\'s coup had already ended the French Revolution. Without freedom from foreign domination, constitutional development is impossible.'
+            },
+            '1913': {
+                layout: 'single',
+                title: '17th Amendment Era (1913)',
+                subtitle: 'Removing a Structural Safeguard',
+                right: {
+                    name: 'UNITED STATES',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.7, power: 0.35, 
+                        institutionName: 'PRESIDENT',
+                        label: 'Woodrow Wilson (Progressive)',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.5, power: 0.35, 
+                        institutionName: 'SENATE',
+                        label: 'Now directly elected',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.7, power: 0.45, 
+                        institutionName: 'HOUSE + PRIMARIES',
+                        label: 'Direct primaries spreading',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 180, y: 205 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Appointments, Veto' },
+                        aristToDem: { status: 'weak', label: 'Both now direct-elected' },
+                        demToExec: { status: 'active', label: 'Appropriations' }
+                    },
+                    external: { right: 'Progressive movement' },
+                    judicial: { health: 0.7, captured: null }
+                },
+                description: 'The 17th Amendment made Senators directly elected. Progressives framed this as "more democracy," but it removed a structural check: Senators no longer answered to state governments. Combined with direct primaries, deliberative filters began eroding.'
+            },
+            '2024-US': {
+                layout: 'single',
+                title: 'United States Today (2024)',
+                subtitle: 'Structural Erosion Continues',
+                right: {
+                    name: 'UNITED STATES',
+                    nameColor: 'text-red-300',
+                    executive: { 
+                        health: 0.45, power: 0.45, 
+                        institutionName: 'PRESIDENT + AGENCIES',
+                        label: 'Executive orders, admin state',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.35, power: 0.4, 
+                        institutionName: 'SENATE + DONORS',
+                        label: 'Partisan, money-driven',
+                        corrupt: true, 
+                        corruptLabel: 'Trending oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.4, power: 0.4, 
+                        institutionName: 'HOUSE + PRIMARIES',
+                        label: 'Low turnout, media-driven',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 150, y: 185 },
+                    checks: { 
+                        execToArist: { status: 'weak', label: 'Partisan alignment' },
+                        aristToDem: { status: 'weak', label: 'Both money-dependent' },
+                        demToExec: { status: 'weak', label: 'Oversight weakened' }
+                    },
+                    external: { left: 'Lobbyists\nDonors\nConsultants', right: 'Media\nSocial media' },
+                    judicial: { health: 0.5, captured: null }
+                },
+                description: 'Executive power expanded through agencies. Senate became partisan, not deliberative. Primaries dominated by money and media. The administrative state creates an unelected fourth branch. Structural checks remain but are weakened.'
+            },
+            'Utah-1940': {
+                layout: 'single',
+                title: 'Utah Pre-1947',
+                subtitle: 'Caucus-Convention System Intact',
+                right: {
+                    name: 'UTAH',
+                    nameColor: 'text-amber-300',
+                    executive: { 
+                        health: 0.7, power: 0.3, 
+                        institutionName: 'GOVERNOR',
+                        label: 'Accountable to party',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.65, power: 0.35, 
+                        institutionName: 'PARTY LEADERS + LEGISLATURE',
+                        label: 'Convention-vetted',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.75, power: 0.4, 
+                        institutionName: 'PRECINCT CAUCUSES',
+                        label: 'Neighbors deliberate together',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 170, y: 190 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Party accountability' },
+                        aristToDem: { status: 'active', label: 'Convention vets candidates' },
+                        demToExec: { status: 'active', label: 'Caucus selects delegates' }
+                    },
+                    external: {},
+                    judicial: { health: 0.7, captured: null },
+                    filter: { show: true, label: 'Caucus -> Convention -> Nominee', weak: false }
+                },
+                description: 'Utah\'s caucus-convention system provided structured democratic participation. Neighbors met locally, deliberated, and selected delegates who vetted candidates. This deliberation filter prevented capture by outside money.'
+            },
+            'Utah-1950s': {
+                layout: 'single',
+                title: 'Utah 1947-1959',
+                subtitle: 'Direct Primary Experiment',
+                right: {
+                    name: 'UTAH',
+                    nameColor: 'text-amber-300',
+                    executive: { 
+                        health: 0.6, power: 0.35, 
+                        institutionName: 'GOVERNOR',
+                        label: 'Primary-selected',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.5, power: 0.4, 
+                        institutionName: 'PARTY ESTABLISHMENT',
+                        label: 'Less accountable',
+                        corrupt: false 
+                    },
+                    democracy: { 
+                        health: 0.55, power: 0.4, 
+                        institutionName: 'DIRECT PRIMARIES',
+                        label: 'Advertising-driven',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 175, y: 200 },
+                    checks: { 
+                        execToArist: { status: 'active', label: 'Party still has role' },
+                        aristToDem: { status: 'weak', label: 'No convention filter' },
+                        demToExec: { status: 'active', label: 'Primary elections' }
+                    },
+                    external: { right: 'Advertising money' },
+                    judicial: { health: 0.65, captured: null },
+                    filter: { show: false }
+                },
+                description: 'Utah experimented with direct primaries for over a decade. Without the deliberation filter, campaigns became expensive and disconnected from grassroots. By 1959, Utah returned to caucus-convention, recognizing "more democracy" had reduced meaningful participation.'
+            },
+            'Utah-Now': {
+                layout: 'single',
+                title: 'Utah Today (2024)',
+                subtitle: 'Deliberation Under Siege',
+                right: {
+                    name: 'UTAH',
+                    nameColor: 'text-amber-300',
+                    executive: { 
+                        health: 0.5, power: 0.4, 
+                        institutionName: 'GOVERNOR',
+                        label: 'Donor-connected',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.35, power: 0.5, 
+                        institutionName: 'LEGISLATURE + LOBBYISTS',
+                        label: 'Corporate influence',
+                        corrupt: true, 
+                        corruptLabel: 'Trending oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.35, power: 0.3, 
+                        institutionName: 'CAUCUSES',
+                        label: 'Low turnout (propaganda effect)',
+                        corrupt: false 
+                    },
+                    powerCenter: { x: 140, y: 185 },
+                    checks: { 
+                        execToArist: { status: 'weak', label: 'Shared donor networks' },
+                        aristToDem: { status: 'weak', label: 'CMV undermines caucuses' },
+                        demToExec: { status: 'weak', label: 'Participation discouraged' }
+                    },
+                    external: { top: 'CMV propaganda', left: 'Lobbyists\nCorporate $\nNational PACs', right: 'Initiatives\n(Court-backed)' },
+                    judicial: { health: 0.35, captured: 'democracy' },
+                    filter: { show: true, label: 'Caucus system (under attack)', weak: true }
+                },
+                description: 'Utah faces pressure from multiple directions. Lobbyists influence the legislature. "Count My Vote" propaganda discourages caucus participation while pushing initiatives. The Supreme Court enables initiatives to circumvent legislative deliberation. The 1774 pattern: oligarchy disguised as democracy.'
+            },
+            'Utah-Future': {
+                layout: 'single',
+                title: 'Utah Without Caucuses (Projected)',
+                subtitle: 'What Happens When the Filter is Removed',
+                right: {
+                    name: 'UTAH (Projected)',
+                    nameColor: 'text-amber-300',
+                    executive: { 
+                        health: 0.4, power: 0.35, 
+                        institutionName: 'GOVERNOR',
+                        label: 'Highest fundraiser wins',
+                        corrupt: false 
+                    },
+                    aristocracy: { 
+                        health: 0.25, power: 0.55, 
+                        institutionName: 'CONSULTANTS + DONORS',
+                        label: 'Control candidate selection',
+                        corrupt: true, 
+                        corruptLabel: 'Oligarchy' 
+                    },
+                    democracy: { 
+                        health: 0.3, power: 0.4, 
+                        institutionName: 'PRIMARIES + INITIATIVES',
+                        label: 'Manipulated by advertising',
+                        corrupt: true, 
+                        corruptLabel: 'Manipulated' 
+                    },
+                    powerCenter: { x: 150, y: 215 },
+                    checks: { 
+                        execToArist: { status: 'broken', label: 'Same donor networks' },
+                        aristToDem: { status: 'broken', label: 'Money controls both' },
+                        demToExec: { status: 'weak', label: 'Votes without deliberation' }
+                    },
+                    external: { left: 'National $\nPACs\nConsultants', right: 'Ballot initiatives\n(no deliberation)' },
+                    judicial: { health: 0.3, captured: 'democracy' },
+                    filter: { show: false }
+                },
+                description: 'Without caucuses: Primaries become advertising competitions. Initiatives bypass deliberation—whatever can be sold becomes law. Party leadership captured by consultants. The "democratic" element is democratic in name only, controlled by money. The 1774 pattern completed.'
+            }
+        };
+
+        // RENDERING
+        function getColor(health, corrupt, inactive) {
+            if (inactive) return 'rgb(92, 64, 51)';
+            if (corrupt) {
+                const r = Math.floor(130 + (1 - health) * 70);
+                const g = Math.floor(35 + health * 25);
+                const b = Math.floor(35 + health * 25);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+            const r = Math.floor(30 + (1 - health) * 90);
+            const g = Math.floor(90 + health * 130);
+            const b = Math.floor(45 + (1 - health) * 55);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        function renderTriangle(svgId, data, suffix) {
+            const svg = document.getElementById(svgId);
+            const defs = svg.querySelector('defs').outerHTML;
+            let content = '';
+            
+            // Triangle outline
+            content += `<polygon points="${vertices.executive.x},${vertices.executive.y} ${vertices.aristocracy.x},${vertices.aristocracy.y} ${vertices.democracy.x},${vertices.democracy.y}"
+                         fill="none" stroke="#475569" stroke-width="1" stroke-dasharray="4,4"/>`;
+            
+            // Check lines with arrows
+            const checkEdges = [
+                { key: 'execToArist', from: vertices.executive, to: vertices.aristocracy, labelOffset: { x: -50, y: 0 } },
+                { key: 'aristToDem', from: vertices.aristocracy, to: vertices.democracy, labelOffset: { x: 0, y: 30 } },
+                { key: 'demToExec', from: vertices.democracy, to: vertices.executive, labelOffset: { x: 50, y: 0 } }
+            ];
+            
+            checkEdges.forEach(edge => {
+                const check = data.checks[edge.key];
+                const isActive = check.status === 'active';
+                const isWeak = check.status === 'weak';
+                const color = isActive ? '#22c55e' : (isWeak ? '#a16207' : '#dc2626');
+                const dash = isActive ? '0' : '6,4';
+                const marker = isActive ? `url(#arrow-green-${suffix})` : `url(#arrow-red-${suffix})`;
+                
+                // Calculate line endpoints (shortened to not overlap vertices)
+                const dx = edge.to.x - edge.from.x;
+                const dy = edge.to.y - edge.from.y;
+                const len = Math.sqrt(dx*dx + dy*dy);
+                const offsetStart = 25;
+                const offsetEnd = 25;
+                const x1 = edge.from.x + (dx/len) * offsetStart;
+                const y1 = edge.from.y + (dy/len) * offsetStart;
+                const x2 = edge.to.x - (dx/len) * offsetEnd;
+                const y2 = edge.to.y - (dy/len) * offsetEnd;
+                
+                content += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+                            stroke="${color}" stroke-width="2" stroke-dasharray="${dash}"
+                            marker-end="${marker}" opacity="0.8"/>`;
+                
+                // Check label
+                const midX = (edge.from.x + edge.to.x) / 2 + edge.labelOffset.x;
+                const midY = (edge.from.y + edge.to.y) / 2 + edge.labelOffset.y;
+                const textColor = isActive ? '#86efac' : (isWeak ? '#fcd34d' : '#fca5a5');
+                
+                // Wrap long labels
+                const words = check.label.split(' ');
+                if (words.length > 2 && check.label.length > 15) {
+                    const mid = Math.ceil(words.length / 2);
+                    const line1 = words.slice(0, mid).join(' ');
+                    const line2 = words.slice(mid).join(' ');
+                    content += `<text x="${midX}" y="${midY - 5}" text-anchor="middle" fill="${textColor}" font-size="8">${line1}</text>`;
+                    content += `<text x="${midX}" y="${midY + 5}" text-anchor="middle" fill="${textColor}" font-size="8">${line2}</text>`;
+                } else {
+                    content += `<text x="${midX}" y="${midY}" text-anchor="middle" fill="${textColor}" font-size="8">${check.label}</text>`;
+                }
+            });
+            
+            // Center point
+            content += `<circle cx="${centerX}" cy="${centerY}" r="2" fill="#475569" opacity="0.3"/>`;
+            
+            // Deliberation filter
+            if (data.filter && data.filter.show) {
+                const filterX = (vertices.aristocracy.x + vertices.democracy.x) / 2;
+                const filterY = (vertices.aristocracy.y + vertices.democracy.y) / 2 - 8;
+                const filterColor = data.filter.weak ? '#a16207' : '#22c55e';
+                content += `<ellipse cx="${filterX}" cy="${filterY}" rx="55" ry="11"
+                             fill="none" stroke="${filterColor}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.75"/>`;
+                content += `<text x="${filterX}" y="${filterY + 3}" text-anchor="middle" fill="${filterColor}" font-size="7" font-weight="500">
+                        ${data.filter.label}</text>`;
+            }
+            
+            // Vertices
+            const vertexConfig = [
+                { key: 'executive', pos: vertices.executive, nameY: -48, labelY: -36, corruptY: -24 },
+                { key: 'aristocracy', pos: vertices.aristocracy, nameY: 36, labelY: 48, corruptY: 60 },
+                { key: 'democracy', pos: vertices.democracy, nameY: 36, labelY: 48, corruptY: 60 }
+            ];
+            
+            vertexConfig.forEach(v => {
+                const d = data[v.key];
+                const isInactive = d.inactive || d.health === 0;
+                const color = getColor(d.health, d.corrupt, isInactive);
+                const basePower = isInactive ? 0.1 : d.power;
+                const glowSize = 12 + basePower * 30;
+                const coreSize = 8 + basePower * 12;
+                
+                if (!isInactive) {
+                    content += `<circle cx="${v.pos.x}" cy="${v.pos.y}" r="${glowSize}"
+                                fill="${color}" opacity="${0.15 + basePower * 0.25}" filter="url(#glow-${suffix})"/>`;
+                }
+                
+                const strokeColor = isInactive ? '#78350f' : (d.corrupt ? '#b91c1c' : '#166534');
+                content += `<circle cx="${v.pos.x}" cy="${v.pos.y}" r="${coreSize}"
+                            fill="${color}" stroke="${strokeColor}" stroke-width="${d.corrupt ? 2 : 1}"/>`;
+                
+                // Institution name (bold)
+                const nameColor = isInactive ? '#78350f' : '#cbd5e1';
+                content += `<text x="${v.pos.x}" y="${v.pos.y + v.nameY}" text-anchor="middle" 
+                            fill="${nameColor}" font-size="9" font-weight="bold">${d.institutionName}</text>`;
+                
+                // Label (description)
+                content += `<text x="${v.pos.x}" y="${v.pos.y + v.labelY}" text-anchor="middle" 
+                            fill="${isInactive ? '#78350f' : '#64748b'}" font-size="7">${d.label}</text>`;
+                
+                // Corrupt label
+                if (d.corrupt && d.corruptLabel) {
+                    content += `<text x="${v.pos.x}" y="${v.pos.y + v.corruptY}" text-anchor="middle" 
+                                fill="#f87171" font-size="7" font-weight="bold">-> ${d.corruptLabel}</text>`;
+                }
+            });
+            
+            // Power center
+            content += `<circle cx="${data.powerCenter.x}" cy="${data.powerCenter.y}" r="7"
+                        fill="#fbbf24" opacity="0.45" filter="url(#power-glow-${suffix})"/>`;
+            content += `<circle cx="${data.powerCenter.x}" cy="${data.powerCenter.y}" r="3.5" fill="#fef3c7"/>`;
+            
+            // External forces (positioned further out)
+            if (data.external) {
+                if (data.external.top) {
+                    content += `<text x="${centerX}" y="25" text-anchor="middle" fill="#f87171" font-size="9">
+                                ${data.external.top}</text>`;
+                }
+                if (data.external.left) {
+                    const lines = data.external.left.split('\n');
+                    lines.forEach((line, i) => {
+                        content += `<text x="15" y="${150 + i * 12}" text-anchor="start" fill="#f87171" font-size="8">
+                                    ${line}</text>`;
+                    });
+                }
+                if (data.external.right) {
+                    const lines = data.external.right.split('\n');
+                    lines.forEach((line, i) => {
+                        content += `<text x="325" y="${150 + i * 12}" text-anchor="end" fill="#f87171" font-size="8">
+                                    ${line}</text>`;
+                    });
+                }
+            }
+            
+            // Judicial branch
+            if (data.judicial) {
+                const jx = 300;
+                const jy = 60;
+                const jHealth = data.judicial.health;
+                const jCaptured = data.judicial.captured;
+                const jColor = jCaptured ? '#7c3aed' : getColor(jHealth, false, false);
+                
+                if (jCaptured && vertices[jCaptured]) {
+                    content += `<line x1="${jx}" y1="${jy}" x2="${vertices[jCaptured].x}" y2="${vertices[jCaptured].y}"
+                                stroke="#7c3aed" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>`;
+                }
+                
+                content += `<circle cx="${jx}" cy="${jy}" r="${6 + jHealth * 6}" fill="${jColor}" opacity="0.35"/>`;
+                content += `<circle cx="${jx}" cy="${jy}" r="${4 + jHealth * 4}" fill="${jColor}" stroke="#5b21b6" stroke-width="1"/>`;
+                content += `<text x="${jx}" y="${jy + 18}" text-anchor="middle" fill="#a78bfa" font-size="7" font-weight="bold">JUDICIAL</text>`;
+                if (jCaptured) {
+                    content += `<text x="${jx}" y="${jy + 27}" text-anchor="middle" fill="#f87171" font-size="6">(captured)</text>`;
+                }
+            }
+            
+            svg.innerHTML = defs + content;
+        }
+        
+        function renderSnapshot(key, updateHash = true) {
+            const snap = snapshots[key];
+            if (!snap) return;
+            
+            if (updateHash) updateUrlHash(key);
+            
+            document.getElementById('snapshot-title').textContent = snap.title;
+            document.getElementById('snapshot-subtitle').textContent = snap.subtitle;
+            document.getElementById('snapshot-description').textContent = snap.description;
+            
+            document.querySelectorAll('button[data-key]').forEach(btn => {
+                btn.className = btn.dataset.key === key 
+                    ? 'px-2 py-1 rounded text-xs transition-all btn-active'
+                    : 'px-2 py-1 rounded text-xs transition-all btn-inactive';
+            });
+            
+            const leftContainer = document.getElementById('left-container');
+            const rightContainer = document.getElementById('right-container');
+            const leftTitle = document.getElementById('left-title');
+            const rightTitle = document.getElementById('right-title');
+            
+            if (snap.layout === 'single') {
+                leftContainer.style.display = 'none';
+                rightContainer.style.display = 'block';
+                rightTitle.textContent = snap.right.name;
+                rightTitle.className = `text-center text-lg font-semibold mb-2 ${snap.right.nameColor}`;
+                renderTriangle('right-svg', snap.right, 'r');
+            } else {
+                leftContainer.style.display = 'block';
+                rightContainer.style.display = 'block';
+                leftTitle.textContent = snap.left.name;
+                leftTitle.className = `text-center text-lg font-semibold mb-2 ${snap.left.nameColor}`;
+                rightTitle.textContent = snap.right.name;
+                rightTitle.className = `text-center text-lg font-semibold mb-2 ${snap.right.nameColor}`;
+                renderTriangle('left-svg', snap.left, 'l');
+                renderTriangle('right-svg', snap.right, 'r');
+            }
+        }
+        
+        // INIT
+        const categories = {
+            colonial: ['1630', '1634', '1685', '1689', '1760', '1774', '1776-PA', '1786', '1789'],
+            other: ['1793-France', '1795-Dutch'],
+            modern: ['1913', '2024-US', 'Utah-1940', 'Utah-1950s', 'Utah-Now', 'Utah-Future']
+        };
+        
+        Object.entries(categories).forEach(([cat, keys]) => {
+            const container = document.getElementById(`button-container-${cat}`);
+            keys.forEach(key => {
+                const btn = document.createElement('button');
+                let label = key;
+                if (key.startsWith('Utah-')) label = 'UT ' + key.replace('Utah-', '');
+                if (key === '1776-PA') label = '1776 PA';
+                if (key === '1793-France') label = '1793 France';
+                if (key === '1795-Dutch') label = '1795 Dutch';
+                if (key === '2024-US') label = '2024 US';
+                btn.textContent = label;
+                btn.dataset.key = key;
+                btn.className = 'px-2 py-1 rounded text-xs transition-all btn-inactive';
+                btn.onclick = () => renderSnapshot(key);
+                container.appendChild(btn);
+            });
+        });
+        
+        const params = getUrlParams();
+        if (params.mode) applyMode(params.mode);
+        const initialSnapshot = params.snapshot && snapshots[params.snapshot] ? params.snapshot : '1774';
+        renderSnapshot(initialSnapshot, !params.snapshot);
+        
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.slice(1);
+            if (hash && snapshots[hash]) renderSnapshot(hash, false);
+        });
+    </script>
+</body>
+</html>
